@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>表作成（参）</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+  <style>
+    body {
+      margin-left: 10px;
+    }
+    main {
+      flex-shrink: 0;
+      width: 100%;
+    }
+    table { 
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    #startbtn {
+      background-color: violet;
+    }
+
+    #mondai-box {
+      width: 700px;
+      display: grid;
+      grid-template-rows: 200px 50px 50px 100px;
+      grid-template-columns: repeat(10,70px);
+    }
+  </style>
+</head>
+<body>
+  <div style="display: inline-block" style="margin:2px 10px;">「同じものを数える」　計算する人 : </div>
+  <select id="jidoname">
+    <option value="mune">Munenori</option>
+    <option value="yuma">Yuma</option>
+    <option value="koko">Kokona</option>
+    <option value="kent">Kento</option>
+    <option value="kama">KAMA</option>
+  </select>
+  <div style="display: flex;margin:15px 0px;">   
+    <div style="margin-left:10px;margin-right:10px;">ステージ : </div>
+    <select id="stage">
+      <option value="1">1(10,20,50,100円)</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5(500,1000円)</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+      <option value="11">11</option>
+      <option value="12">12(30,40,60,70,80,90円)</option>
+      <option value="13">13</option>
+      <option value="14">14</option>
+      <option value="15">15</option>
+      <option value="16">16</option>
+      <option value="17">17</option>
+      <option value="18">18</option>
+      <option value="19">19</option>
+      <option value="20">20</option>      
+    </select>
+  
+</div>
+
+<div style="display: flex;margin:15px 20px;">  
+  <input type="button" value="スタート" onclick="stage_start()" id="startbtn">
+  <div style="margin-left: 20px;" id="monmeDsp"></div>
+</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.min.js"></script>
+  <main style="display:flex">
+    <div id="mondai-box">  
+      <img id="d00"><img id="d01"><img id="d02"><img id="d03"><img id="d04"><img id="d05"><img id="d06"><img id="d07"><img id="d08"><img id="d09">
+      <div id="d10"></div><div id="d11"></div><div id="d12"></div><div id="d13"></div><div id="d14"></div><div id="d15"></div><div id="d16"></div><div id="d17"></div><div id="d18"></div><div id="d19"></div>
+      <div id="d20"></div><div id="d21"></div><div id="d22"></div><div id="d23"></div><div id="d24"></div><div id="d25"></div><div id="d26"></div><div id="d27"></div><div id="d28"></div><div id="d29"></div>
+      <div id="d30"></div><div id="d31"></div><div id="d32"></div><div id="d33"></div><div id="d34"></div><div id="d35"></div><div id="d36"></div><div id="d37"></div><div id="d38"></div><div id="d39"></div>
+    </div>
+    <div id="divcanvas"></div>
+    <div id="oekaki-button" sytle="display:flex">
+      <input type="button" value="クリア" onclick="oekaki_clear()" style="margin-left:20px" >
+    </div>
+  </main>
+
+  <audio src="oto-s1.mp3" id="oto-s1"></audio>
+  <audio src="oto-s2.mp3" id="oto-s2"></audio>
+  <audio src="oto-s3.mp3" id="oto-s3"></audio>
+  <audio src="oto-s4.mp3" id="oto-s4"></audio>
+  <audio src="oto-s5.mp3" id="oto-s5"></audio>
+  <audio src="oto-s6.mp3" id="oto-s6"></audio>
+  <audio src="oto-s7.mp3" id="oto-s7"></audio>
+  <audio src="oto-s8.mp3" id="oto-s8"></audio>
+  <audio src="oto-s9.mp3" id="oto-s9"></audio>
+  <audio src="oto-s10.mp3" id="oto-s10"></audio>
+  <audio src="mario-peach.wav" id="mario-p"></audio>
+
+<script>
+
+const stageData = [
+  [{ne:10,ko:2},{ne:20,ko:2},{ne:50,ko:2},{ne:100,ko:2}],
+  [{ne:10,ko:3},{ne:20,ko:3},{ne:50,ko:3},{ne:100,ko:3}],
+  [{ne:10,ko:4},{ne:20,ko:4},{ne:50,ko:4},{ne:100,ko:4}],
+  [{ne:10,ko:5},{ne:20,ko:5},{ne:50,ko:5},{ne:100,ko:5}],
+  [{ne:10,ko:6},{ne:100,ko:6},{ne:500,ko:2},{ne:1000,ko:2}],
+  [{ne:10,ko:7},{ne:100,ko:7},{ne:1000,ko:3},{ne:1000,ko:3}],
+  [{ne:10,ko:8},{ne:100,ko:8},{ne:500,ko:4},{ne:1000,ko:4}],
+  [{ne:10,ko:9},{ne:100,ko:9},{ne:1000,ko:5},{ne:1000,ko:5}],
+  [{ne:10,ko:10},{ne:100,ko:10},{ne:20,ko:6},{ne:50,ko:6}],
+  [{ne:20,ko:7},{ne:50,ko:7},{ne:20,ko:8},{ne:50,ko:8}],
+  [{ne:20,ko:9},{ne:50,ko:9},{ne:20,ko:10},{ne:50,ko:10}],
+  [{ne:30,ko:2},{ne:40,ko:2},{ne:60,ko:2},{ne:70,ko:2},{ne:80,ko:2},{ne:90,ko:2}],
+  [{ne:30,ko:3},{ne:40,ko:3},{ne:60,ko:3},{ne:70,ko:3},{ne:80,ko:3},{ne:90,ko:3}],
+  [{ne:30,ko:4},{ne:40,ko:4},{ne:60,ko:4},{ne:70,ko:4},{ne:80,ko:4},{ne:90,ko:4}],
+  [{ne:30,ko:5},{ne:40,ko:5},{ne:60,ko:5},{ne:70,ko:5},{ne:80,ko:5},{ne:90,ko:5}],
+  [{ne:30,ko:6},{ne:40,ko:6},{ne:60,ko:6},{ne:70,ko:6},{ne:80,ko:6},{ne:90,ko:6},{ne:500,ko:6},{ne:90,ko:6}],
+  [{ne:30,ko:7},{ne:40,ko:7},{ne:60,ko:7},{ne:70,ko:7},{ne:80,ko:7},{ne:90,ko:7},{ne:500,ko:7},{ne:90,ko:7}],
+  [{ne:30,ko:8},{ne:40,ko:8},{ne:60,ko:8},{ne:70,ko:8},{ne:80,ko:8},{ne:90,ko:8},{ne:500,ko:8},{ne:90,ko:8}],
+  [{ne:30,ko:9},{ne:40,ko:9},{ne:60,ko:9},{ne:70,ko:9},{ne:80,ko:9},{ne:90,ko:9},{ne:500,ko:9},{ne:90,ko:9}],
+  [{ne:30,ko:10},{ne:40,ko:10},{ne:60,ko:10},{ne:70,ko:10},{ne:80,ko:10},{ne:90,ko:10},{ne:500,ko:10},{ne:90,ko:10}],
+];
+
+var startBtn = document.getElementById('startbtn');
+var mondaibox = document.getElementById('mondai-box');
+
+let jidoname = document.getElementById('jidoname');
+let nanizan = document.getElementById('nanizan');
+let stageNo = document.getElementById('stage');
+
+var audios1 = document.getElementById('oto-s1');
+var audios2 = document.getElementById('oto-s2');
+var audios3 = document.getElementById('oto-s3');
+var audios4 = document.getElementById('oto-s4');
+var audios5 = document.getElementById('oto-s5');
+var audios6 = document.getElementById('oto-s6');
+var audios7 = document.getElementById('oto-s7');
+var audios8 = document.getElementById('oto-s8');
+var audios9 = document.getElementById('oto-s9');
+var audios10 = document.getElementById('oto-s10');
+var audio = document.getElementById('mario-p');
+
+var d=[[],[],[],[]];
+var shouhinimg=[[],[],[],[]];
+d[2][7] = document.getElementById('d27');
+monmeDsp = document.getElementById('monmeDsp');
+/*
+for (i=0;i++;i<10) {
+  var d[0][i] = dpcument.getElementById(`d${0}${i}`)
+}
+*/
+
+//var d = new Array(3);
+//d[0] = new Array(10);
+let kosu;
+let nedan;
+let goukei;
+let i=0;
+let j=0;
+
+let startTime;
+let sakuseizumi = 0;
+let kaitozumi = 0;
+let monme = 0;
+let zenmondaisu = 0;
+let stageIs = 0; // ステージプレイ中
+
+// 画面の初期設定
+var kotae = document.createElement('input');
+  kotae.type = "tel";
+  kotae.size = 4;
+  kotae.style.height = "30px"; 
+  kotae.id = "kotae"
+  d[3][7] = document.getElementById('d37');
+  d[3][7].appendChild(kotae);
+  var kotaeBtn = document.createElement('button');
+  kotaeBtn.textContent = "こたえ";
+  kotaeBtn.style.width = "65px";
+  kotaeBtn.style.marginTop = "20px";
+  kotaeBtn.id = "kotaebtn";
+  d[3][7].appendChild(kotaeBtn);
+  d[3][8] = document.getElementById('d38');
+  d[3][8].innerHTML = "円";
+  d[3][8].style.marginTop = "7px";
+
+startTime = new Date();
+
+const array1 = [];
+let array1_ko = [];
+let array2 =[];
+array1.push(jidoname.value);         //名前 0
+array1.push(startTime.getYear());    //年   1
+array1.push(startTime.getMonth()+1); // 2
+array1.push(startTime.getDate());    // 3
+array1.push(startTime.getHours());   // 4
+array1.push(startTime.getMinutes()); // 5
+array1.push(startTime.getSeconds()); // 6
+for (i=0;i<3;i++) {
+  array1.push(""); // 7-9 終了時間をあとで代入
+}
+array1.push(stageNo.value); 
+
+// スクロールを禁止する関数
+function noScroll(event) {
+  event.preventDefault();
+}
+// スクロール禁止(SP)
+document.addEventListener('touchmove', noScroll, { passive: false });
+// スクロール禁止(PC)
+document.addEventListener('mousewheel', noScroll, { passive: false });
+// スクロール禁止を解除(SP)
+//document.removeEventListener('touchmove', noScroll, { passive: false });
+// スクロール禁止を解除(PC)
+//document.removeEventListener('mousewheel', noScroll, { passive: false });
+
+//----- ステージスタート -----
+function stage_start() {
+  if (stageIs==0) {
+    array1[0] = jidoname.value; //名前を再入力
+    startBtn.style.opacity = 0.4;
+    stageIs = 1;
+    generate_table();
+  }
+}
+
+//----- 問題の表示 関数 -----
+function generate_table() {
+console.log("jidoname=",jidoname.value);
+console.log("stageNo.value=",stageNo.value);
+
+
+if (sakuseizumi == 0) {
+  // 答え欄を消す
+  kotae.value = "";
+  // 問題作成
+  // ＋ステージによってjpg、値段を変更
+  d[2][7].innerHTML = "";
+  monmeDsp.innerHTML = `${monme+1}問目`;
+  let dataSequence = stageData[stageNo.value-1];
+  zenmondaisu = dataSequence.length;
+  kosu = dataSequence[monme].ko;
+  nedan = dataSequence[monme].ne;
+
+  var srcimg;
+  switch (nedan) {
+  case 10:
+    srcimg = "umaibou10en.jpg";
+    break;
+  case 20:
+    srcimg = "bozeri20en.jpg";
+    break;
+  case 30:
+    srcimg = "tiroru30en.jpg";
+    break;
+  case 40:
+    srcimg = "yangu40en.jpg";
+    break;
+  case 50:
+    srcimg = "yochan50en.jpg";
+    break;
+  case 60:
+    srcimg = "wanage60en.jpg";
+    break;      
+  case 70:
+    srcimg = "poteti70en.jpg";
+    break;      
+  case 80:
+    srcimg = "butamen80en.jpg";
+    break;      
+  case 90:
+    srcimg = "daifuku90en.jpg";
+    break;      
+  case 100:
+    srcimg = "anpanman100en.jpg";
+    break;      
+  case 500:
+    srcimg = "rolecake500en.jpg";
+    break;      
+  case 1000:
+    srcimg = "cake1000en.jpg";
+    break;      
+  }
+
+  i=0;
+  for (j=0;j<kosu;j++){
+    d[i][j] = document.getElementById(`d${i}${j}`);
+    if (d[i][j].src=='undefined') {
+
+    } else {
+      d[i][j].removeAttribute('src');
+    }
+    d[i][j].src = srcimg;
+  }
+  setTimeout(() => {
+  i=0;
+  for (j = 0; j < kosu; j++) { // 商品の写真を表示
+      console.log(d[i][j]);
+      var width = d[i][j].naturalWidth;
+      var height = d[i][j].naturalHeight;
+      console.log("w,h =",width,height);
+      if (width<=70 || width * 200/height <= 70){
+        d[i][j].style.width = "auto";
+        d[i][j].style.height = "200px";
+      } else {
+        d[i][j].style.width = "70px";
+        d[i][j].style.height = "auto";
+      }
+  }
+  }, 100);
+  
+  i=1;
+  for (j = 0; j < kosu; j++) { // 商品の値段を表示
+    d[i][j] = document.getElementById(`d${i}${j}`);
+    d[i][j].innerHTML = `${nedan}円`;  
+    d[i][j].style.textAlign = "center";
+  }
+  goukei = kosu * nedan; // 買い物の合計金額
+
+  //+data の保存
+  // m1=Math.floor(Math.random()*(+hanni.value+1));
+  // m2=Math.floor(Math.random()*(+hanni.value+1));
+  // array1_ko = [m1,m2,enzan,""];
+
+  sakuseizumi = 1;
+}
+}
+
+//----- 正解判定 -----
+kotaeBtn.addEventListener('click', ()=>{
+  if (kotae.value==goukei) {
+    d[2][7].innerHTML = "せいかい";
+    d[2][7].style.textAlign = "center"; 
+    monme += 1;
+    seikaioto(monme); // 音
+    sakuseizumi = 0;
+    if (monme+1 > zenmondaisu) {
+      d[2][7].innerHTML = "つぎの<br>ステージ"; //
+      monme = 0;
+      // ステージ終わりデータ保存へ
+      stageIs = 0;
+      startBtn.style.opacity = 1;
+      return;
+    }
+    setTimeout(()=>{
+      kotae.value = "";
+      generate_table();
+    },1500);
+  } else {
+    d[2][7].innerHTML = "もう一回";
+    d[2][7].style.textAlign = "center"; 
+  }
+});
+
+function seikaioto(monme) {  // 音を出す
+    console.log("monme=",monme);
+    switch (monme) {
+    case 1:
+        audios1.play();
+        break;
+    case 2:
+        audios2.play();
+        break;
+    case 3:
+        audios3.play();
+        break;
+    case 4:
+        audios4.play();
+        break;
+    case 5:
+        audios5.play();
+        break;
+    case 6:
+        audios6.play();
+        break;
+    case 7:
+        audios7.play();
+        break;
+    case 8:
+        audios8.play();
+        break;
+    case 9:
+        audios9.play();
+        break;
+  }
+  //if  (seikai==10){
+  //  audios10.play();
+  //}
+}
+
+
+
+//
+function push_maruButton() {
+  if (kaitozumi==1) {
+    for (i=0;i<10;i++) {
+      array1.pop();
+    }
+  }
+  var seikai=0;
+  for (i=0;i<10;i++) {
+    cellInputv=document.getElementById("input"+String(i));
+    array1.push(cellInputv.value);  
+
+    seigov=document.getElementById("seigo"+String(i));
+    if (nanizan.value=="tasu") {
+      if(cellInputv.value == array2[i][0]+array2[i][1]) {
+        seigov.textContent = "○";
+      } else {
+        seigov.textContent = "×";
+      }
+    } 
+    if (nanizan.value=="hiku") {
+      if(cellInputv.value == array2[i][0]-array2[i][1]) {
+        seigov.textContent = "○";
+      } else {
+        seigov.textContent = "×";
+      }
+    }
+    if (nanizan.value=="kake") {
+      if(cellInputv.value == array2[i][0]*array2[i][1]) {
+        seigov.textContent = "○";
+        seikai=seikai+1;
+      } else {
+        seigov.textContent = "×";
+      }
+    }
+    console.log("nanizan.value=",nanizan.value) 
+    if (nanizan.value=="waru") {
+      if(cellInputv.value == array2[i][0]/array2[i][1]) {
+        seigov.textContent = "○";
+      } else {
+        seigov.textContent = "×";
+      }
+    } 
+  }  
+
+  // 終わりの時刻
+  endTime = new Date();
+  array1[7] = endTime.getHours(); 
+  array1[8] = endTime.getMinutes(); 
+  array1[9] = endTime.getSeconds(); 
+  console.log(array1);
+  //console.log(array2);
+
+    $.ajax({
+        url: 'sutidata.php',
+        type: 'GET',
+        dataType: 'json',
+        data: {"sousin" : array1 }
+    }).done(function(data){
+        /* 通信成功時 */
+        $('.result').text(data); //取得したHTMLを.resultに反映
+        
+    }).fail(function(data){
+        /* 通信失敗時 */
+        //$('.result').text('通信失敗！');
+	      console.log("通信失敗!");
+                
+    });
+  kaitozumi = 1;
+}
+
+// p5.js
+function setup() {
+  let canvas = createCanvas(300, 400);
+  canvas.parent('divcanvas');
+  background('skyblue');
+  //noStroke();
+  fill('white');
+}
+var LX;
+var LY;
+let upp=0;
+function draw() {
+  if(mouseIsPressed){
+    if(upp==0){
+      LX = mouseX;
+      LY = mouseY;
+    }
+    line(LX, LY, mouseX, mouseY);
+    LX = mouseX;
+    LY = mouseY;
+    upp=1;
+  }else{
+    upp=0;
+  }
+
+}
+
+function oekaki_clear() {
+  fill('skyblue');
+  rect(-1, -1, 602, 402);
+  console.log("drawing rect")
+}
+
+
+</script>
+
+</body>  
+</html>
