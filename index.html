@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>表作成（参）</title>
+  <title>同じものを数える（順）</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
   <style>
@@ -20,6 +20,7 @@
 
     #startbtn {
       background-color: violet;
+      height: 40px;
     }
 
     #mondai-box {
@@ -61,9 +62,9 @@
       <option value="17">17</option>
       <option value="18">18</option>
       <option value="19">19</option>
-      <option value="20">20</option>      
+      <option value="20">20</option>   
     </select>
-  
+    <div id="nextstage"></div>
 </div>
 
 <div style="display: flex;margin:15px 2px;">  
@@ -95,11 +96,12 @@
   <audio src="oto-s9.mp3" id="oto-s9"></audio>
   <audio src="oto-s10.mp3" id="oto-s10"></audio>
   <audio src="mario-peach.wav" id="mario-p"></audio>
+  <audio src="fuseikai.mp3" id="fuseikai"></audio>
 
 <script>
 
 const stageData = [
-  [{ne:10,ko:2},{ne:20,ko:2},{ne:50,ko:2},{ne:100,ko:2}],
+[{ne:10,ko:2},{ne:20,ko:2},{ne:50,ko:2},{ne:100,ko:2}],
   [{ne:10,ko:3},{ne:20,ko:3},{ne:50,ko:3},{ne:100,ko:3}],
   [{ne:10,ko:4},{ne:20,ko:4},{ne:50,ko:4},{ne:100,ko:4}],
   [{ne:10,ko:5},{ne:20,ko:5},{ne:50,ko:5},{ne:100,ko:5}],
@@ -119,6 +121,7 @@ const stageData = [
   [{ne:30,ko:8},{ne:40,ko:8},{ne:60,ko:8},{ne:70,ko:8},{ne:80,ko:8},{ne:90,ko:8},{ne:500,ko:8},{ne:1000,ko:8}],
   [{ne:30,ko:9},{ne:40,ko:9},{ne:60,ko:9},{ne:70,ko:9},{ne:80,ko:9},{ne:90,ko:9},{ne:500,ko:9},{ne:1000,ko:9}],
   [{ne:30,ko:10},{ne:40,ko:10},{ne:60,ko:10},{ne:70,ko:10},{ne:80,ko:10},{ne:90,ko:10},{ne:500,ko:10},{ne:1000,ko:10}],
+
 ];
 
 var startBtn = document.getElementById('startbtn');
@@ -139,11 +142,14 @@ var audios8 = document.getElementById('oto-s8');
 var audios9 = document.getElementById('oto-s9');
 var audios10 = document.getElementById('oto-s10');
 var audio = document.getElementById('mario-p');
+var fuseikai = document.getElementById('fuseikai');
+
 
 var d=[[],[],[],[]];
 var shouhinimg=[[],[],[],[]];
-d[2][7] = document.getElementById('d27');
-monmeDsp = document.getElementById('monmeDsp');
+d[2][6] = document.getElementById('d26');
+var monmeDsp = document.getElementById('monmeDsp');
+var nextstage = document.getElementById('nextstage');
 /*
 for (i=0;i++;i<10) {
   var d[0][i] = dpcument.getElementById(`d${0}${i}`)
@@ -167,21 +173,26 @@ let stageIs = 0; // ステージプレイ中
 
 // 画面の初期設定
 var kotae = document.createElement('input');
-  kotae.type = "tel";
-  kotae.size = 4;
-  kotae.style.height = "30px"; 
-  kotae.id = "kotae"
-  d[3][7] = document.getElementById('d37');
-  d[3][7].appendChild(kotae);
-  var kotaeBtn = document.createElement('button');
-  kotaeBtn.textContent = "こたえ";
-  kotaeBtn.style.width = "65px";
-  kotaeBtn.style.marginTop = "20px";
-  kotaeBtn.id = "kotaebtn";
-  d[3][7].appendChild(kotaeBtn);
-  d[3][8] = document.getElementById('d38');
-  d[3][8].innerHTML = "円";
-  d[3][8].style.marginTop = "7px";
+kotae.type = "tel";
+kotae.size = 5;
+kotae.style.height = "60px";
+kotae.style.fontSize = "24pt"; 
+kotae.id = "kotae"
+d[2][7] = document.getElementById('d27');
+d[2][7].appendChild(kotae);
+
+var kotaeBtn = document.createElement('button');
+kotaeBtn.textContent = "こたえ";
+kotaeBtn.style.width = "65px";
+kotaeBtn.style.height = "40px";
+kotaeBtn.style.marginTop = "40px";
+kotaeBtn.id = "kotaebtn";
+d[3][8] = document.getElementById('d38');
+d[3][8].appendChild(kotaeBtn);
+
+d[3][9] = document.getElementById('d39');
+d[3][9].innerHTML = "円";
+d[3][9]. marginTop = "0px";
 
 startTime = new Date();
 
@@ -220,6 +231,8 @@ function stage_start() {
     startBtn.style.opacity = 0.4;
     stageIs = 1;
     generate_table();
+    nextstage.textContent = "";
+    d[2][6].textContent = "";
   }
 }
 
@@ -234,7 +247,7 @@ if (sakuseizumi == 0) {
   kotae.value = "";
   // 問題作成
   // ＋ステージによってjpg、値段を変更
-  d[2][7].innerHTML = "";
+  d[2][6].innerHTML = "";
   monmeDsp.innerHTML = `${monme+1}問目`;
   let dataSequence = stageData[stageNo.value-1];
   zenmondaisu = dataSequence.length;
@@ -282,18 +295,23 @@ if (sakuseizumi == 0) {
   }
 
   i=0;
-  for (j=0;j<kosu;j++){
+  for (j=0;j<10;j++) {
     d[i][j] = document.getElementById(`d${i}${j}`);
+    d[i+1][j] = document.getElementById(`d${i+1}${j}`);
     if (d[i][j].src=='undefined') {
 
     } else {
       d[i][j].removeAttribute('src');
+      d[1][j].innerHTML = "";
     }
-    d[i][j].src = srcimg;
+  }
+  
+  for (j = 0; j < kosu; j++) { // 商品の写真を表示
+      d[i][j].src = srcimg;
   }
   setTimeout(() => {
   i=0;
-  for (j = 0; j < kosu; j++) { // 商品の写真を表示
+  for (j = 0; j < kosu; j++) { // 遅れてサイズ調整
       console.log(d[i][j]);
       var width = d[i][j].naturalWidth;
       var height = d[i][j].naturalHeight;
@@ -325,16 +343,20 @@ if (sakuseizumi == 0) {
 }
 }
 
+      
 //----- 正解判定 -----
 kotaeBtn.addEventListener('click', ()=>{
   if (kotae.value==goukei) {
-    d[2][7].innerHTML = "せいかい";
-    d[2][7].style.textAlign = "center"; 
+    d[2][6].innerHTML = "せいかい";
+    d[2][6].style.textAlign = "center"; 
     monme += 1;
     seikaioto(monme); // 音
     sakuseizumi = 0;
     if (monme+1 > zenmondaisu) {
-      d[2][7].innerHTML = "つぎの<br>ステージ"; //
+
+      nextstage.textContent = "つぎのステージへ！";
+      nextstage.style.fontSize = "12pt";
+      nextstage.textContent.fontcolor = "red";  
       monme = 0;
       // ステージ終わりデータ保存へ
       stageIs = 0;
@@ -346,8 +368,9 @@ kotaeBtn.addEventListener('click', ()=>{
       generate_table();
     },1500);
   } else {
-    d[2][7].innerHTML = "もう一回";
-    d[2][7].style.textAlign = "center"; 
+    d[2][6].innerHTML = "もう一回";
+    d[2][6].style.textAlign = "center"; 
+    fuseikai.play();
   }
 });
 
@@ -380,6 +403,9 @@ function seikaioto(monme) {  // 音を出す
         break;
     case 9:
         audios9.play();
+        break;
+    case 10:
+        audios10.play();
         break;
   }
   //if  (seikai==10){
